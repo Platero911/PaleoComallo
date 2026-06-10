@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paleoparque Comallo - Demo Final</title>
+<style>
+body{font-family:Segoe UI,Arial;margin:0;background:#f4efe6;color:#222}
+header{background:#c95f44;color:white;padding:20px;text-align:center}
+.container{max-width:1200px;margin:auto;padding:20px}
+.panel{background:white;border-radius:12px;padding:15px;margin-bottom:15px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.progress{height:28px;background:#ddd;border-radius:20px;overflow:hidden}
+.bar{height:100%;width:0;background:#4caf50;transition:.5s}
+.map{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.node{padding:12px;border-radius:10px;background:#eee;text-align:center}
+.done{background:#b7f0b7}
+.current{background:#ffe08a}
+button{padding:8px 12px;border:none;border-radius:8px;cursor:pointer}
+.station{border-left:5px solid #c95f44;padding-left:10px;margin-bottom:15px}
+.badge{display:inline-block;background:#ffd54f;padding:6px 10px;border-radius:15px;margin:4px}
+#guide{font-style:italic}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🦤 Paleoparque Comallo</h1>
+<p>Reconstruye el Ecosistema Perdido de Comallo</p>
+</header>
+
+<div class="container">
+
+<div class="panel">
+<h2>Guía del recorrido</h2>
+<p id="guide">Hola explorador, soy Kelenken. Descubre las especies del Paleoparque para completar tu misión.</p>
+</div>
+
+<div class="panel">
+<h2>Mapa Vivo</h2>
+<div class="map" id="map"></div>
+</div>
+
+<div class="panel">
+<h2>Progreso</h2>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<p id="progressText">0% completado</p>
+</div>
+
+<div class="panel">
+<h2>Logros</h2>
+<div id="achievements"></div>
+</div>
+
+<div class="panel">
+<h2>Estaciones</h2>
+<div id="stations"></div>
+</div>
+
+</div>
+
+<script>
+const especies=[
+{nombre:"Proborhyaena", logro:"🦷 Depredador Marsupial"},
+{nombre:"Astrapotherium", logro:"🐘 Habitante del Mioceno"},
+{nombre:"Kelenken", logro:"🦤 Señor de las Aves del Terror"},
+{nombre:"Argentavis", logro:"🦅 Dueño de los Cielos"},
+{nombre:"Smilodon", logro:"🦷 Colmillo de Sable"},
+{nombre:"Notiomastodon", logro:"🐘 Gigante de las Pampas"},
+{nombre:"Purussaurus", logro:"🐊 Señor de las Aguas"}
+];
+
+let completadas=JSON.parse(localStorage.getItem("pp_comallo")||"[]");
+
+const map=document.getElementById("map");
+const stations=document.getElementById("stations");
+
+especies.forEach((e,i)=>{
+ let n=document.createElement("div");
+ n.className="node";
+ n.id="map"+i;
+ n.innerHTML=(i+1)+". "+e.nombre;
+ map.appendChild(n);
+
+ let s=document.createElement("div");
+ s.className="station";
+ s.innerHTML=`
+ <h3>${i+1}. ${e.nombre}</h3>
+ <p>Aquí irá el audio, imágenes y contenido de la especie.</p>
+ <button onclick="completar(${i})">Descubrir especie</button>`;
+ stations.appendChild(s);
+});
+
+function actualizar(){
+ let count=completadas.length;
+ let pct=Math.round((count/especies.length)*100);
+
+ document.getElementById("bar").style.width=pct+"%";
+ document.getElementById("progressText").innerText=pct+"% completado";
+
+ document.querySelectorAll(".node").forEach(x=>x.className="node");
+
+ completadas.forEach(i=>{
+   document.getElementById("map"+i).classList.add("done");
+ });
+
+ if(count<especies.length){
+   let next=0;
+   while(completadas.includes(next)) next++;
+   let el=document.getElementById("map"+next);
+   if(el) el.classList.add("current");
+ }
+
+ let a=document.getElementById("achievements");
+ a.innerHTML="";
+ completadas.forEach(i=>{
+   a.innerHTML+=`<span class="badge">${especies[i].logro}</span>`;
+ });
+
+ if(count===especies.length){
+   a.innerHTML += "<h3>🏆 GUARDIÁN DEL PALEOPARQUE</h3>";
+   document.getElementById("guide").innerText =
+   "¡Felicitaciones! Has reconstruido el ecosistema perdido de Comallo.";
+ }
+}
+
+function completar(i){
+ if(!completadas.includes(i)){
+   completadas.push(i);
+   localStorage.setItem("pp_comallo",JSON.stringify(completadas));
+   actualizar();
+ }
+}
+
+actualizar();
+</script>
+
+</body>
+</html>
