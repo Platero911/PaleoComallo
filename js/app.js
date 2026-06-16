@@ -121,13 +121,15 @@ location.reload();
 
 actualizar();
 
-// Detectar especie desde QR
-
 const params = new URLSearchParams(window.location.search);
 
 const especieQR = params.get("e");
 
 if(especieQR && especies[especieQR]){
+
+    localStorage.setItem(especieQR,"1");
+
+    actualizar();
 
     mostrar(especieQR);
 
